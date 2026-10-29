@@ -1,0 +1,30 @@
+metric,value
+categories,3738
+files,49310
+crawl_depth_limit,4
+categories_unexplored_at_depth_limit,2049
+photo_share_percent,94.92
+mediatype_accuracy_percent,100.0
+files_from_wiki_loves_earth,3984
+files_from_wiki_loves_monuments,1926
+files_from_wiki_loves_africa,1795
+files_from_wiki_loves_folklore,4503
+files_theme_other,12507
+files_theme_culture,10426
+files_theme_history,8659
+files_theme_buildings,2965
+files_theme_geography,2787
+files_theme_sports,2569
+files_theme_people,2522
+files_theme_environment,1803
+files_theme_charts and data,1412
+files_theme_wikimedia community,1152
+files_theme_government,886
+files_theme_health,747
+files_theme_economy,559
+files_theme_education,316
+categories_at_depth_0,1
+categories_at_depth_1,32
+categories_at_depth_2,357
+categories_at_depth_3,1299
+categories_at_depth_4,2049

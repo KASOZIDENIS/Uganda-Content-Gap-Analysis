@@ -1,0 +1,5 @@
+# The SQLite store is a binary that changes on every pipeline run, so git
+# would keep a full ~10 MB copy per run. LFS keeps only the current version
+# in a clone. It is tracked rather than ignored because src_viz/export_data.py
+# reads it directly, so a clone without it cannot rebuild the pages.
+data/*.db filter=lfs diff=lfs merge=lfs -text

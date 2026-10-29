@@ -1,0 +1,7 @@
+﻿Measure,Value,Note
+Distinct articles anywhere in the walked tree,12858,every article in a category the walk reached
+  of which fail the test for being about Uganda,4319,listed in _Excluded_not_about_Uganda.csv
+  of which are about Uganda,8526,
+Added by the Wikidata corpus and by search,355,passed the same tests
+"ARTICLES ABOUT UGANDA, in total",8881,the _All_articles file
+Search results rejected for not being about Uganda,17499,pages that mention Uganda without being about it

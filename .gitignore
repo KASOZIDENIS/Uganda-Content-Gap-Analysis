@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Downloaded from third parties and re-fetched on demand: the UBOS census
+# workbook is 9 MB from a server that times out as often as it answers, so it
+# is kept on disk but not in the repository.
+data/cache/
+
+# Pipeline run logs
+data/*.log
+
+# SQLite WAL sidecars, recreated on every run and checkpointed away on close
+data/*.db-wal
+data/*.db-shm
+
+# Excel lock files
+~$*
