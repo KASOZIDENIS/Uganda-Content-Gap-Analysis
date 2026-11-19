@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Uganda Mega Editathon: live leaderboard</title>
+<meta name="description" content="Live leaderboard and task lists for the Uganda Mega Editathon: adding images to Wikipedia, Wikidata and Commons.">
+<link rel="icon" href="assets/logo.png" type="image/png">
+<script>(function(){try{var p=localStorage.getItem('atlas-theme');if(p==='light'||p==='dark')document.documentElement.setAttribute('data-theme',p)}catch(e){}})()</script>
+<link rel="stylesheet" href="assets/atlas.css">
+<style>
+.eh-hero{padding:34px 0 8px}
+.eh-hero h1{font-family:var(--f-display);font-weight:600;font-size:clamp(34px,5vw,54px);line-height:1.05;margin:8px 0 10px}
+.eh-hero h1 em{color:var(--blue-t);font-style:italic}
+.eh-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.live{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-data);font-size:12px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--raise);color:var(--fg)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.live.on i{background:var(--green);box-shadow:0 0 0 0 var(--green);animation:pulse 1.8s infinite}
+.live.warn i{background:#d9a400}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(51,153,102,.6)}70%{box-shadow:0 0 0 8px rgba(51,153,102,0)}100%{box-shadow:0 0 0 0 rgba(51,153,102,0)}}
+.count{font-family:var(--f-data);font-size:13px;color:var(--soft)}
+.eh-kpis{margin-top:22px}
+.eh-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 16px}
+.eh-panel{display:none}.eh-panel.on{display:block}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.pod{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;text-align:center}
+.pod .n{font-family:var(--f-display);font-size:30px;font-weight:600;color:var(--blue-t)}
+.pod .u{font-weight:600;font-size:17px;word-break:break-word}
+.pod .p{font-family:var(--f-data);font-size:13px;color:var(--soft);margin-top:4px}
+.pod.first{border-color:var(--blue)}
+table.t{border-collapse:collapse;width:100%;font-size:13.5px}
+table.t th{position:sticky;top:0;background:var(--raise);text-align:left;font-family:var(--f-data);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.num,table.t th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.t a{color:var(--blue-t)}
+.pts{font-weight:700}
+.bar{height:10px;border-radius:5px;background:var(--raise);overflow:hidden;border:1px solid var(--line)}
+.bar>i{display:block;height:100%;background:var(--blue)}
+.prog{display:grid;gap:14px}
+.prog .r{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,2fr) 130px;gap:14px;align-items:center}
+.prog .r .l{font-size:14px}
+.prog .r .v{font-family:var(--f-data);font-size:12.5px;color:var(--soft);text-align:right}
+.badge{display:inline-block;font-family:var(--f-data);font-size:11px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;background:var(--raise);color:var(--soft);white-space:nowrap}
+.badge.ok{color:var(--green-t);border-color:var(--green)}
+.empty{padding:34px 10px;text-align:center;color:var(--soft)}
+.feed{display:grid;gap:0}
+.feed .f{display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:12px;padding:9px 4px;border-bottom:1px solid var(--line);align-items:baseline}
+.feed .f .ts{font-family:var(--f-data);font-size:12px;color:var(--mute)}
+.feed .f .pt{font-family:var(--f-data);font-size:12.5px;color:var(--green-t)}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.ctl select,.ctl input[type=search]{background:var(--raise);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font:inherit;min-width:0}
+.ctl input[type=search]{flex:1 1 220px}
+.how h3{font-family:var(--f-display);font-size:22px;margin:22px 0 6px}
+.how p,.how li{color:var(--soft);max-width:78ch}
+.pg{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px;font-family:var(--f-data);font-size:12.5px;color:var(--soft)}
+.note{font-size:12.5px;color:var(--mute);margin-top:8px}
+@media(max-width:720px){.podium{grid-template-columns:1fr}.prog .r{grid-template-columns:1fr}.prog .r .v{text-align:left}.feed .f{grid-template-columns:64px 1fr}.feed .f .pt{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><img src="assets/logo.png" alt="" width="28" height="28">Uganda Wikimedia Atlas</a>
+  <span class="sp"></span>
+  <a class="tl" href="index.html">Dashboards</a>
+  <a class="tl" href="editathon.html" style="color:var(--fg)">Editathon</a>
+  <div class="theme" id="theme" role="group" aria-label="Colour theme">
+    <button type="button" data-m="light" title="Light" aria-label="Light mode"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="3.6"/><path d="M10 2v2.2M10 15.8V18M2 10h2.2M15.8 10H18M4.3 4.3l1.6 1.6M14.1 14.1l1.6 1.6M15.7 4.3l-1.6 1.6M5.9 14.1l-1.6 1.6"/></svg></button>
+    <button type="button" data-m="dark" title="Dark" aria-label="Dark mode"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M16.5 12.2A7 7 0 0 1 7.8 3.5a7 7 0 1 0 8.7 8.7z"/></svg></button>
+    <button type="button" data-m="system" title="Match my device" aria-label="System mode"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="15" height="10" rx="1.5"/><path d="M7 17h6M10 13.5V17"/></svg></button>
+  </div>
+</div></div>
+
+<main class="wrap">
+  <section class="eh-hero">
+    <div class="eyebrow">Wikimedia Community User Group Uganda</div>
+    <h1>Uganda <em>Mega</em> Editathon</h1>
+    <p class="lede" id="tagline">Adding images to Wikipedia, Wikidata and Commons for Uganda.</p>
+    <div class="eh-row">
+      <span class="live" id="liveBadge"><i></i><span id="liveText">Connecting…</span></span>
+      <span class="count" id="countdown"></span>
+    </div>
+    <div class="kpis eh-kpis" id="kpis"></div>
+  </section>
+
+  <div class="eh-tabs" id="tabs" role="tablist">
+    <button class="btn" type="button" data-p="board" aria-pressed="true">Leaderboard</button>
+    <button class="btn" type="button" data-p="progress" aria-pressed="false">Progress</button>
+    <button class="btn" type="button" data-p="feed" aria-pressed="false">Live edits</button>
+    <button class="btn" type="button" data-p="tasks" aria-pressed="false">Task lists</button>
+    <button class="btn" type="button" data-p="how" aria-pressed="false">How it works</button>
+  </div>
+
+  <section class="eh-panel on" id="p-board"></section>
+  <section class="eh-panel" id="p-progress"></section>
+  <section class="eh-panel" id="p-feed"></section>
+  <section class="eh-panel" id="p-tasks"></section>
+  <section class="eh-panel how" id="p-how"></section>
+</main>
+
+<footer class="sitefoot"><div class="wrap"><span>Wikimedia Community User Group Uganda · Uganda Mega Editathon</span><span>Live data: Wikimedia APIs, refreshed every minute</span></div></footer>
+
+<script type="module">
+import { computeBoard, buildContext, SMALL_LISTS, windowState, cleanUser } from './editathon/board.js';
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = n => Number(n || 0).toLocaleString('en-GB');
+const J = async (u, opts) => { const r = await fetch(u, opts); if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); };
+const wikiLink = (cfg, wiki, title) => (cfg.wikis[wiki] ? cfg.wikis[wiki].site : 'https://en.wikipedia.org/wiki/') + encodeURI(String(title).replace(/ /g, '_'));
+
+// theme buttons (same behaviour as the atlas)
+(() => {
+  const root = document.documentElement, box = $('#theme');
+  const cur = () => { try { return localStorage.getItem('atlas-theme') || 'system'; } catch (e) { return 'system'; } };
+  const paint = () => box.querySelectorAll('button').forEach(b => b.style.color = b.dataset.m === cur() ? 'var(--fg)' : '');
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    try { if (b.dataset.m === 'system') { localStorage.removeItem('atlas-theme'); root.removeAttribute('data-theme'); } else { localStorage.setItem('atlas-theme', b.dataset.m); root.setAttribute('data-theme', b.dataset.m); } } catch (e) {}
+    paint();
+  });
+  paint();
+})();
+
+let CFG, INDEX, CTX, BOARD = null, METRICS = null, PARTS = [], SOURCE = 'none', LAST_OK = null;
+
+// ---------- tabs
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#tabs .btn').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  document.querySelectorAll('.eh-panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + b.dataset.p));
+  if (b.dataset.p === 'tasks') initTasks();
+  history.replaceState(null, '', '#' + b.dataset.p);
+});
+
+// ---------- header
+function renderHead() {
+  $('#tagline').textContent = CFG.tagline;
+  const st = windowState(CFG), el = $('#countdown');
+  const tick = () => {
+    const now = new Date(), s = new Date(CFG.start), e = new Date(CFG.end);
+    const dur = ms => { const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4), sec = Math.floor(ms % 6e4 / 1e3); return `${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(sec).padStart(2, '0')}s`; };
+    el.textContent = now < s ? 'Starts in ' + dur(s - now) + '. ' + CFG.timezoneNote : now <= e ? 'Ends in ' + dur(e - now) : 'The editathon has ended. Final results below.';
+  };
+  tick(); setInterval(tick, 1000);
+  return st;
+}
+
+function renderKpis() {
+  const t = (BOARD && BOARD.totals) || {};
+  const items = [['Participants', t.participants], ['Edits counted', t.edits], ['Points scored', t.points], ['Wikidata labels and images', (t.labels || 0) + (t.images || 0)]];
+  $('#kpis').innerHTML = items.map(([h, v]) => `<div class="kpi"><div class="eyebrow">${esc(h)}</div><div class="num big" style="font-family:var(--f-display);font-size:32px;font-weight:600">${fmt(v)}</div></div>`).join('');
+}
+
+function setLive(kind, text) {
+  const b = $('#liveBadge'); b.className = 'live ' + kind; $('#liveText').textContent = text;
+}
+
+// ---------- leaderboard
+function renderBoard() {
+  const root = $('#p-board'), b = BOARD;
+  if (!PARTS.length) {
+    root.innerHTML = `<div class="card empty"><b>No participants have signed up yet.</b><br>Add usernames to <a href="https://github.com/kasozidenis/uganda-atlas/edit/main/editathon/participants.json" target="_blank" rel="noopener">editathon/participants.json</a>. See “How it works”.</div>`;
+    return;
+  }
+  if (!b) { root.innerHTML = '<div class="card empty">Loading…</div>'; return; }
+  const us = b.users, top = us.filter(u => u.points > 0).slice(0, 3);
+  const pod = top.length ? `<div class="podium">${top.map((u, i) => `<div class="pod ${i === 0 ? 'first' : ''}"><div class="n">${u.rank}</div><div class="u">${userLink(u.user)}</div><div class="p">${fmt(u.points)} points · ${fmt(u.edits)} edits</div></div>`).join('')}</div>` : '';
+  const rows = us.map(u => `<tr><td class="num">${u.rank == null ? '–' : u.rank}</td><td>${userLink(u.user)}${u.team ? ` <span class="badge">${esc(u.team)}</span>` : ''}</td>
+    <td class="num pts">${fmt(u.points)}</td><td class="num">${fmt(u.tasks)}</td><td class="num">${fmt(u.images)}</td><td class="num">${fmt(u.labels)}</td><td class="num">${fmt(u.uploads)}</td><td class="num">${fmt(u.edits)}</td><td>${u.last ? ago(u.last) : '–'}</td></tr>`).join('');
+  const state = b.state === 'upcoming' ? '<div class="note">The editathon has not started: points count from ' + new Date(CFG.start).toLocaleString('en-GB') + '.</div>' : '';
+  root.innerHTML = pod + `<div class="tbl-wrap card" style="padding:0"><table class="t"><thead><tr><th class="num">#</th><th>Participant</th><th class="num">Points</th><th class="num">Task pages</th><th class="num">Wikidata images</th><th class="num">Luganda labels</th><th class="num">Uploads</th><th class="num">Edits</th><th>Last edit</th></tr></thead><tbody>${rows}</tbody></table></div>` + state +
+    `<div class="note">Points: ${scoreText()}. Reverted edits earn nothing. Tap “How it works” for the rules.</div>`;
+}
+const userLink = u => `<a href="https://en.wikipedia.org/wiki/Special:CentralAuth/${encodeURIComponent(u)}" target="_blank" rel="noopener">${esc(u)}</a>`;
+const scoreText = () => { const p = CFG.points; return `${p.edit} per page edited each day, +${p.task_page} for a page on the task lists, +${p.luganda_label} per Luganda label on Wikidata, +${p.wikidata_image} per image (P18) connected on Wikidata, +${p.upload} per Commons upload`; };
+function ago(ts) {
+  const s = Math.max(0, (Date.now() - new Date(ts)) / 1000);
+  if (s < 90) return 'just now'; if (s < 3600) return Math.round(s / 60) + ' min ago'; if (s < 86400) return Math.round(s / 3600) + ' h ago';
+  return Math.round(s / 86400) + ' d ago';
+}
+
+// ---------- progress
+function renderProgress() {
+  const root = $('#p-progress'); if (!BOARD) { root.innerHTML = '<div class="card empty">Loading…</div>'; return; }
+  const L = BOARD.progress.lists;
+  const rows = INDEX.lists.map(l => {
+    const p = L[l.id] || { done: 0, total: l.count }; const pc = p.total ? Math.min(100, p.done / p.total * 100) : 0;
+    const m = METRICS && METRICS.lists && METRICS.lists[l.id];
+    const ver = m ? `<br><span title="Checked on the live wiki">${fmt(m.done)} now fixed (checked ${new Date(METRICS.generated).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })})</span>` : '';
+    return `<div class="r"><div class="l">${esc(l.name)}</div><div class="bar"><i style="width:${Math.max(pc, p.done ? 1 : 0)}%"></i></div><div class="v">${fmt(p.done)} of ${fmt(p.total)} worked on · ${pc < 0.1 && p.done ? '<0.1' : pc.toFixed(1)}%${ver}</div></div>`;
+  }).join('');
+  const per = {}; BOARD.users.forEach(u => Object.entries(u.byWiki).forEach(([w, n]) => per[w] = (per[w] || 0) + n));
+  const wk = Object.entries(CFG.wikis).map(([w, c]) => `<tr><td>${esc(c.label)}</td><td class="num">${fmt(per[w] || 0)}</td></tr>`).join('');
+  root.innerHTML = `<div class="card"><div class="eyebrow" style="margin-bottom:12px">Task items worked on by participants</div><div class="prog">${rows}</div>
+    <div class="note">“Worked on” counts an item once, when a participant edits it. “Now fixed” is a separate check of the live wiki, repeated about once an hour (the two large Wikidata lists are counted from edits only).</div></div>
+    <div class="card" style="margin-top:16px"><div class="eyebrow" style="margin-bottom:8px">Counted edits by project</div><table class="t"><tbody>${wk}</tbody></table></div>`;
+}
+
+// ---------- live feed
+function renderFeed() {
+  const root = $('#p-feed'); if (!BOARD) { root.innerHTML = '<div class="card empty">Loading…</div>'; return; }
+  if (!BOARD.feed.length) { root.innerHTML = '<div class="card empty">No counted edits yet. They appear here as soon as participants save them.</div>'; return; }
+  const kind = { upload: 'upload', label: 'Luganda label', image: 'image added', task: 'task page', edit: 'edit' };
+  root.innerHTML = `<div class="card feed">${BOARD.feed.map(f => {
+    const w = CFG.wikis[f.wiki] || { label: f.wiki, site: '' };
+    const diff = w.site ? w.site.replace('/wiki/', '/wiki/Special:Diff/') + f.revid : '#';
+    return `<div class="f"><span class="ts">${ago(f.ts)}</span><span><b>${userLink(f.user)}</b> · ${esc(kind[f.kind] || f.kind)} · <a href="${wikiLink(CFG, f.wiki, f.title)}" target="_blank" rel="noopener">${esc(f.title)}</a> <span class="badge">${esc(w.label)}</span> <a class="badge" href="${diff}" target="_blank" rel="noopener">diff</a></span><span class="pt">+${f.points}</span></div>`;
+  }).join('')}</div>`;
+}
+
+// ---------- tasks
+let TASKS = null;
+const TS = { list: null, rows: [], loaded: 0, page: 0, q: '', hideDone: false, done: new Map(), tried: new Set(), busy: false };
+const PAGE = 25;
+const LG_BOIL = new Set(['File:Arbcom ru editing.svg', 'File:Georgia in United States.svg', 'File:Kentucky counties map.png', 'File:Puzzle-W-glossy.svg', 'File:Texas in United States.svg']);
+const NYN_BOIL = new Set(['File:OOjs UI icon edit-ltr.svg']);
+const WORKBOOKS = ['Wikipedia Articles Without a Lead Image.xlsx', 'Wikipedia article images that need capturing.xlsx', 'Luganda Wikipedia Articles Without an Image.xlsx', 'Luganda article images that need Capturing.xlsx',
+  'Runyankore Incubator Articles Without an Image.xlsx', 'Runyankore article images that need Capturing.xlsx', 'Wikidata - Image Gaps.xlsx', 'Wikidata item images that need capturing.xlsx', 'Wiki data items with  No luganda label.xlsx'];
+
+function initTasks() {
+  if (TASKS) return; TASKS = true;
+  const root = $('#p-tasks');
+  root.innerHTML = `<div class="ctl"><select id="tl">${INDEX.lists.map(l => `<option value="${l.id}">${esc(l.name)} (${fmt(l.count)})</option>`).join('')}</select>
+    <input id="tq" type="search" placeholder="Search this list"><label style="font-size:13px;color:var(--soft)"><input id="th" type="checkbox"> Hide items already done</label></div>
+    <div class="note" id="tinfo" style="margin:0 0 10px"></div><div class="tbl-wrap card" style="padding:0"><table class="t" id="tt"></table></div><div class="pg" id="tpg"></div>
+    <div class="note">“Status” is read live from Wikipedia and Wikidata when the rows are shown. Prefer the spreadsheets? ${WORKBOOKS.map(w => `<a href="MEGA%20EDITATHON/${encodeURIComponent(w)}">${esc(w.replace('.xlsx', ''))}</a>`).join(' · ')}</div>`;
+  $('#tl').addEventListener('change', () => selectList($('#tl').value));
+  let tm; $('#tq').addEventListener('input', () => { clearTimeout(tm); tm = setTimeout(async () => { TS.q = $('#tq').value.trim().toLowerCase(); TS.page = 0; if (TS.q) await loadAll(); drawTasks(); }, 250); });
+  $('#th').addEventListener('change', () => { TS.hideDone = $('#th').checked; TS.page = 0; drawTasks(); });
+  $('#tpg').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return; TS.page += b.dataset.d === 'n' ? 1 : -1; await ensureRows(); drawTasks(); });
+  const want = new URLSearchParams(location.search).get('list');
+  selectList(INDEX.lists.some(l => l.id === want) ? want : INDEX.lists[0].id);
+}
+async function selectList(id) {
+  TS.list = INDEX.lists.find(l => l.id === id); TS.rows = []; TS.loaded = 0; TS.page = 0; TS.done = new Map(); TS.tried = new Set(); $('#tl').value = id;
+  await loadChunk(); drawTasks();
+}
+async function loadChunk() {
+  const l = TS.list; if (TS.loaded >= l.chunks) return;
+  const rows = await J(`editathon/tasks/${l.id}.${TS.loaded}.json`); TS.loaded++; TS.rows.push(...rows);
+}
+async function loadAll() { while (TS.loaded < TS.list.chunks) await loadChunk(); }
+async function ensureRows() { while ((TS.page + 1) * PAGE > TS.rows.length && TS.loaded < TS.list.chunks) await loadChunk(); }
+const filtered = () => TS.rows.filter(r => (!TS.q || r.some(c => String(c).toLowerCase().includes(TS.q))) && (!TS.hideDone || TS.done.get(r[0]) !== true));
+function rowLinks(l, r) {
+  const wiki = l.wiki, t = r[0];
+  const title = wiki === 'incubatorwiki' ? 'Wp/nyn/' + t : t;
+  const base = CFG.wikis[wiki].site, enc = encodeURIComponent(title.replace(/ /g, '_')).replace(/%2F/g, '/').replace(/%3A/g, ':');
+  const view = base + enc;
+  const edit = wiki === 'wikidatawiki' ? view : base.replace('/wiki/', '/w/index.php?title=') + enc + '&action=edit';
+  return { view, edit };
+}
+function cellFor(l, name, v) {
+  if (!v || v === 'N/A') return '<span style="color:var(--mute)">–</span>';
+  if (/^Image to add$/.test(name)) return `<a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(v.replace(/ /g, '_')).replace(/%3A/g, ':')}" target="_blank" rel="noopener">${esc(v)}</a>`;
+  if (name === 'Commons category') return `<a href="https://commons.wikimedia.org/wiki/Category:${encodeURIComponent(v.replace(/ /g, '_'))}" target="_blank" rel="noopener">${esc(v)}</a>`;
+  if (name === 'Wikidata item') return `<a href="https://www.wikidata.org/wiki/${esc(v)}" target="_blank" rel="noopener">${esc(v)}</a>`;
+  if (name === 'English article') return `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(v.replace(/ /g, '_'))}" target="_blank" rel="noopener">${esc(v)}</a>`;
+  return esc(v);
+}
+function drawTasks() {
+  const l = TS.list, all = filtered(), start = TS.page * PAGE, rows = all.slice(start, start + PAGE);
+  const isWd = l.wiki === 'wikidatawiki', cap = /capture/.test(l.kind) || l.kind === 'wd-capture';
+  const head = `<thead><tr><th class="num">#</th><th>${isWd ? 'Item' : 'Page'}</th>${l.cols.map(c => `<th>${esc(c)}</th>`).join('')}<th>Status</th><th></th></tr></thead>`;
+  const body = rows.map((r, i) => {
+    const lk = rowLinks(l, r), d = TS.done.get(r[0]);
+    const st = d === true ? '<span class="badge ok">done now</span>' : d === false ? '<span class="badge">still open</span>' : '<span class="badge">checking…</span>';
+    const label = isWd ? `${esc(r[0])}${r[1] ? ' · ' + esc(r[1]) : ''}` : esc(r[0]);
+    const cols = l.cols.map((c, k) => (isWd && k === 0) ? '' : `<td>${cellFor(l, c, r[k + 1])}</td>`);
+    const search = cap ? ` <a class="badge" target="_blank" rel="noopener" href="https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(isWd ? (r[1] || r[0]) : (l.cols[0] === 'English article' && r[1] && r[1] !== 'N/A' ? r[1] : r[0]))}&ns6=1&ns14=1">search Commons</a>` : '';
+    const tds = isWd ? `<td>${esc(r[1] || '–')}</td>${l.cols.slice(1).map((c, k) => `<td>${cellFor(l, c, r[k + 2])}</td>`).join('')}` : cols.join('');
+    return `<tr data-k="${esc(r[0])}"><td class="num">${start + i + 1}</td><td><a href="${lk.view}" target="_blank" rel="noopener">${isWd ? esc(r[0]) : esc(r[0])}</a>${search}</td>${tds}<td>${st}</td><td><a class="badge" href="${lk.edit}" target="_blank" rel="noopener">${isWd ? 'open' : 'edit'}</a></td></tr>`;
+  }).join('');
+  // for Wikidata the first extra column (English label) is shown under "Item"; adjust the head accordingly
+  $('#tt').innerHTML = head + `<tbody>${body || `<tr><td colspan="9" class="empty">Nothing to show.</td></tr>`}</tbody>`;
+  const pages = Math.max(1, Math.ceil(all.length / PAGE));
+  $('#tpg').innerHTML = `<span>${fmt(all.length)}${TS.loaded < l.chunks ? '+' : ''} items</span><button class="btn" type="button" data-d="p" ${TS.page <= 0 ? 'disabled' : ''}>Previous</button><span>page ${TS.page + 1} of ${pages}${TS.loaded < l.chunks ? '+' : ''}</span><button class="btn" type="button" data-d="n" ${(TS.page + 1) * PAGE >= all.length && TS.loaded >= l.chunks ? 'disabled' : ''}>Next</button>`;
+  $('#tinfo').textContent = l.name + '. ' + describe(l);
+  checkRows(l, rows.filter(r => !TS.done.has(r[0]) && !TS.tried.has(l.id + '|' + r[0])));
+}
+const describe = l => ({ 'image-exists': 'A free image already exists. Add it to the page.', 'pick-category': 'Choose a suitable photograph from the Commons category and add it.', capture: 'No image found on Commons. Search Commons first; if nothing fits, photograph the subject.',
+  'wd-image-exists': 'The Commons image exists. Add it to the item as “image” (P18).', 'wd-capture': 'No image anywhere. Photograph the subject, upload it to Commons, then add it as “image” (P18).', 'wd-label': 'Add the Luganda name as the item’s label (language lg).' }[l.kind] || '');
+
+async function wapi(wiki, params) {
+  const u = new URLSearchParams(Object.assign({ format: 'json', formatversion: '2', origin: '*' }, params));
+  return J(CFG.wikis[wiki].api + '?' + u);
+}
+async function checkRows(l, rows) {
+  if (!rows.length || TS.busy) return; TS.busy = true; const token = l.id; rows.forEach(r => TS.tried.add(l.id + '|' + r[0]));
+  try {
+    const res = new Map(), wiki = l.wiki;
+    if (wiki === 'wikidatawiki') {
+      const ids = rows.map(r => r[0]), labelList = l.kind === 'wd-label';
+      const j = await wapi(wiki, { action: 'wbgetentities', ids: ids.join('|'), props: labelList ? 'labels' : 'claims', languages: 'lg' });
+      for (const id of ids) { const e = j.entities && j.entities[id]; res.set(id, e && !e.missing ? (labelList ? !!(e.labels && e.labels.lg) : !!(e.claims && e.claims.P18 && e.claims.P18.length)) : null); }
+    } else if (wiki === 'enwiki') {
+      const titles = rows.map(r => r[0]);
+      const j = await wapi(wiki, { action: 'query', titles: titles.join('|'), prop: 'pageprops', ppprop: 'page_image|page_image_free' });
+      const norm = {}; (j.query.normalized || []).forEach(n => norm[n.from] = n.to);
+      const byTitle = {}; (j.query.pages || []).forEach(p => byTitle[p.title] = p);
+      for (const t of titles) { const p = byTitle[norm[t] || t]; res.set(t, p && !p.missing ? !!(p.pageprops && p.pageprops.page_image) : null); }
+    } else {
+      const prefix = wiki === 'incubatorwiki' ? 'Wp/nyn/' : '', boil = wiki === 'incubatorwiki' ? NYN_BOIL : LG_BOIL;
+      const titles = rows.map(r => prefix + r[0]); const imgs = {}; let cont = {}, pages = {};
+      for (let k = 0; k < 6; k++) {
+        const j = await wapi(wiki, Object.assign({ action: 'query', titles: titles.join('|'), prop: 'images', imlimit: 'max' }, cont));
+        (j.query.pages || []).forEach(p => { pages[p.title] = p; imgs[p.title] = (imgs[p.title] || []).concat((p.images || []).map(x => x.title)); });
+        if (!j.continue) break; cont = j.continue;
+      }
+      const norm = {}; // fallback: match on exact returned titles
+      for (const r of rows) { const t = prefix + r[0]; const k = pages[t] ? t : Object.keys(pages).find(x => x.replace(/_/g, ' ') === t); const p = k && pages[k];
+        res.set(r[0], p && !p.missing ? (imgs[k] || []).some(f => !boil.has(f)) : null); }
+    }
+    if (TS.list && TS.list.id === token) { res.forEach((v, k) => { if (v !== null) TS.done.set(k, v); }); }
+  } catch (e) { console.warn('status check failed', e); }
+  TS.busy = false;
+  if (TS.list && TS.list.id === token) {
+    const more = filtered().slice(TS.page * PAGE, TS.page * PAGE + PAGE).filter(r => !TS.done.has(r[0]) && !TS.tried.has(token + '|' + r[0]));
+    if (more.length) setTimeout(() => checkRows(TS.list, more), 0);
+    const t = $('#tt'); if (t) t.querySelectorAll('tbody tr[data-k]').forEach(tr => { const d = TS.done.get(tr.dataset.k); const cell = tr.children[tr.children.length - 2];
+      if (d === true) cell.innerHTML = '<span class="badge ok">done now</span>'; else if (d === false) cell.innerHTML = '<span class="badge">still open</span>'; else cell.innerHTML = '<span class="badge">unknown</span>'; });
+  }
+}
+
+// ---------- how it works
+function renderHow() {
+  const p = CFG.points;
+  $('#p-how').innerHTML = `<div class="card"><h3 style="margin-top:0">What we are doing</h3><p>For three weeks we are improving how Uganda looks on Wikipedia, Wikidata and Wikimedia Commons: adding the missing lead images, connecting existing Commons images, adding Luganda labels, and photographing what has no image yet.</p>
+    <h3>Join in</h3><ol><li>Make an account on Wikipedia if you do not have one.</li><li>Send your username to the organisers, who add it to <a href="https://github.com/kasozidenis/uganda-atlas/edit/main/editathon/participants.json" target="_blank" rel="noopener">participants.json</a>. Only listed usernames appear on the leaderboard.</li><li>Pick a list under “Task lists”, open an item, and make the edit. Add a short edit summary.</li><li>Watch your points here. The page refreshes by itself every minute.</li></ol>
+    <h3>How points work</h3><table class="t"><tbody>
+      <tr><td>Any page you edit (first edit of that page each day)</td><td class="num"><b>${p.edit}</b></td></tr>
+      <tr><td>Extra, for a page that is on the task lists (English Wikipedia, Luganda Wikipedia, Runyankore on the Incubator)</td><td class="num"><b>+${p.task_page}</b></td></tr>
+      <tr><td>Extra, for each Luganda label you add on Wikidata</td><td class="num"><b>+${p.luganda_label}</b></td></tr>
+      <tr><td>Extra, for each image (P18) you connect to a Wikidata item</td><td class="num"><b>+${p.wikidata_image}</b></td></tr>
+      <tr><td>Extra, for each new file you upload to Wikimedia Commons</td><td class="num"><b>+${p.upload}</b></td></tr></tbody></table>
+    <h3>Good to know</h3><ul><li>Only edits made between <b>${new Date(CFG.start).toLocaleString('en-GB')}</b> and <b>${new Date(CFG.end).toLocaleString('en-GB')}</b> (your device’s time) count. ${esc(CFG.timezoneNote)}</li>
+      <li>Reverted edits earn nothing, and repeated tiny edits to one page on the same day earn the base point only once.</li>
+      <li>Labels and images on Wikidata are recognised from the edit summary that Wikidata writes itself, so edits made with the normal Wikidata interface are counted.</li>
+      <li>The organisers can remove edits that break the rules, for example copyright-violating uploads.</li>
+      <li>All numbers come straight from the public Wikimedia APIs, so anyone can check them.</li></ul></div>`;
+}
+
+// ---------- data loading and refresh
+async function loadParticipants() {
+  try { const j = await J('editathon/participants.json?t=' + Date.now(), { cache: 'no-store' }); PARTS = (j.participants || []).filter(p => cleanUser(p.user)); } catch (e) { }
+}
+async function loadMetrics() {
+  try { const j = await J(CFG.metricsUrl + '?t=' + Math.floor(Date.now() / 300000)); if (j && j.lists) METRICS = j; } catch (e) { }
+}
+async function snapshot() {
+  try { const j = await J(CFG.snapshotUrl + '?t=' + Math.floor(Date.now() / 60000)); if (j && j.users) { BOARD = j; SOURCE = 'snapshot'; return true; } } catch (e) { }
+  return false;
+}
+let refreshing = false;
+async function refresh() {
+  if (refreshing) return; refreshing = true;
+  try {
+    await loadParticipants();
+    const b = await computeBoard({ config: CFG, users: PARTS, ctx: CTX, fetchFn: u => fetch(u) });
+    if (b.errors.length && b.errors.length >= Object.keys(CFG.wikis).length) throw new Error('all projects failed');
+    BOARD = b; SOURCE = 'live'; LAST_OK = new Date();
+    setLive(b.errors.length ? 'warn' : 'on', (b.errors.length ? 'Partly live' : 'Live') + ' · updated ' + LAST_OK.toLocaleTimeString('en-GB') + (b.state === 'upcoming' ? ' · not started' : ''));
+  } catch (e) {
+    setLive('warn', SOURCE === 'snapshot' && BOARD ? 'Showing a saved copy from ' + new Date(BOARD.generated).toLocaleTimeString('en-GB') + ' · live refresh failed' : 'Could not reach Wikimedia · retrying');
+  }
+  refreshing = false; drawAll();
+  loadMetrics().then(renderProgress);
+}
+function drawAll() { renderKpis(); renderBoard(); renderProgress(); renderFeed(); }
+
+(async function main() {
+  CFG = await J('editathon/config.json?t=' + Math.floor(Date.now() / 60000));
+  INDEX = await J('editathon/tasks/index.json');
+  renderHead(); renderHow();
+  const loaded = {};
+  await Promise.all(INDEX.lists.filter(l => SMALL_LISTS.includes(l.id)).map(async l => { loaded[l.id] = []; for (let n = 0; n < l.chunks; n++) loaded[l.id].push(...await J(`editathon/tasks/${l.id}.${n}.json`)); }));
+  CTX = buildContext(INDEX, loaded);
+  await loadParticipants();
+  const h = location.hash.replace('#', ''); if (h && $('#tabs [data-p="' + h + '"]')) $('#tabs [data-p="' + h + '"]').click();
+  drawAll();
+  if (windowState(CFG) !== 'upcoming' && await snapshot()) { setLive('warn', 'Saved copy from ' + new Date(BOARD.generated).toLocaleTimeString('en-GB') + ' · going live…'); drawAll(); }
+  await refresh();
+  setInterval(() => { if (!document.hidden && windowState(CFG) !== 'ended') refresh(); }, Math.max(30, CFG.refreshSeconds || 60) * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && LAST_OK && Date.now() - LAST_OK > 45000) refresh(); });
+})().catch(e => { setLive('warn', 'Something went wrong loading the page: ' + e.message); console.error(e); });
+</script>
+</body>
+</html>

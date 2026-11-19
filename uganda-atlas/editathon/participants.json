@@ -1,0 +1,4 @@
+{
+  "_help": "Add one line per participant: {\"user\": \"Wikimedia username\", \"team\": \"optional team name\"}. Usernames are as they appear on Wikipedia (spaces, not underscores). Edit this file on GitHub and save; the leaderboard picks it up within a few minutes.",
+  "participants": []
+}

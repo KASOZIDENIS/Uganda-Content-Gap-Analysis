@@ -1,0 +1,44 @@
+{
+  "name": "Uganda Mega Editathon",
+  "tagline": "Adding images to Wikipedia, Wikidata and Commons for Uganda",
+  "start": "2026-11-20T21:00:00Z",
+  "end": "2026-12-12T20:59:59Z",
+  "timezoneNote": "Starts Saturday 21 November 2026, 00:00 East Africa Time; ends Saturday 12 December 2026, 23:59 East Africa Time.",
+  "refreshSeconds": 60,
+  "snapshotUrl": "https://raw.githubusercontent.com/kasozidenis/uganda-atlas/editathon-data/leaderboard.json",
+  "points": {
+    "edit": 1,
+    "task_page": 4,
+    "luganda_label": 3,
+    "wikidata_image": 5,
+    "upload": 3
+  },
+  "wikis": {
+    "enwiki": {
+      "label": "English Wikipedia",
+      "api": "https://en.wikipedia.org/w/api.php",
+      "site": "https://en.wikipedia.org/wiki/"
+    },
+    "lgwiki": {
+      "label": "Luganda Wikipedia",
+      "api": "https://lg.wikipedia.org/w/api.php",
+      "site": "https://lg.wikipedia.org/wiki/"
+    },
+    "incubatorwiki": {
+      "label": "Runyankore (Incubator)",
+      "api": "https://incubator.wikimedia.org/w/api.php",
+      "site": "https://incubator.wikimedia.org/wiki/"
+    },
+    "wikidatawiki": {
+      "label": "Wikidata",
+      "api": "https://www.wikidata.org/w/api.php",
+      "site": "https://www.wikidata.org/wiki/"
+    },
+    "commonswiki": {
+      "label": "Wikimedia Commons",
+      "api": "https://commons.wikimedia.org/w/api.php",
+      "site": "https://commons.wikimedia.org/wiki/"
+    }
+  },
+  "metricsUrl": "https://raw.githubusercontent.com/kasozidenis/uganda-atlas/editathon-data/metrics.json"
+}
